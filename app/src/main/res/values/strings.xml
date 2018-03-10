@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RTA and Noise</string>
+    <string name="enable_fft">Enable FFT</string>
+</resources>

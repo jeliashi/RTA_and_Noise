@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.jeliav.android.rtaandnoise.MainActivity">
+
+    <Button
+        android:id="@+id/enable_fft_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/bigButtons"
+        android:text="@string/enable_fft"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SurfaceView
+        android:id="@+id/fft_2d_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/enable_fft_button"
+        app:layout_constraintStart_toStartOf="@+id/enable_fft_button"
+        app:layout_constraintTop_toBottomOf="@+id/enable_fft_button" />
+
+</android.support.constraint.ConstraintLayout>
