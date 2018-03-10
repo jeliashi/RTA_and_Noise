@@ -60,12 +60,16 @@ abstract class BaseSurface extends SurfaceView {
         });
     }
 
+    public interface IfActiveInterface{
+        Canvas ifActive(Canvas canvas);
+    }
 
-    public void drawSurface(Function<Canvas,Canvas> ifActive){
+
+    public void drawSurface(IfActiveInterface iaf){
         if (this.active.get()){
             SurfaceHolder  holder = this.getHolder();
             Canvas oldCanvas = holder.lockCanvas();
-            holder.unlockCanvasAndPost(ifActive.apply(oldCanvas));
+            holder.unlockCanvasAndPost(iaf.ifActive(oldCanvas));
         }
     }
 }
