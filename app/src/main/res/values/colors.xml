@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="white">#FFFFFF</color>
+    <color name="background">#141419</color>
+    <color name="specColor">#FF2C00</color>
+    <color name="textPaint">#AAFFFFFF</color>
+    <color name="errPaint">#BBFF0000</color>
 </resources>

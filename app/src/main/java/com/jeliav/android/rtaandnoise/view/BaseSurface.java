@@ -15,7 +15,7 @@ import java.util.function.Function;
  * Created by jeliashiv on 3/9/18.
  */
 
-abstract class BaseSurface extends SurfaceView {
+abstract class BaseSurface extends SurfaceView implements IfActiveInterface {
     public AtomicBoolean active = new AtomicBoolean(false);
 
     public BaseSurface(Context context){
@@ -58,10 +58,6 @@ abstract class BaseSurface extends SurfaceView {
 
             }
         });
-    }
-
-    public interface IfActiveInterface{
-        Canvas ifActive(Canvas canvas);
     }
 
 
