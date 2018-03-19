@@ -73,7 +73,7 @@ public class AudioCollectTest{
 
         Log.d(LOG_TAG, "Creating new Audio record");
 
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+        mAudioRecord = new AudioRecord(audio_source,
                 AUDIO_INPUT_SAMP_RATE,
                 AUDIO_CHANNEL_CONFIG,
                 AUDIO_ENCODING,
