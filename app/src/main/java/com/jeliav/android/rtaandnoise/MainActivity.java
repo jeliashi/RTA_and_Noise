@@ -16,16 +16,11 @@ import com.jeliav.android.rtaandnoise.AudioTools.AudioCollectTest;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
-
     private static final int REQUEST_AUDIO_PERMSSION = 200;
 
     public Button mStart;
-
     private AudioCollectTest mCollect;
-
     public boolean isRecording = false;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,21 +38,17 @@ public class MainActivity extends AppCompatActivity {
                     mCollect.stopRecording();
                     isRecording = false;
                 } else {
-
                     mCollect.mShouldContinue = true;
                     mCollect.startInputStream(MediaRecorder.AudioSource.MIC);
                     mCollect.startRecording();
                     isRecording = true;
                 }
-
             }
         });
-
     }
 
 
     private boolean requestAudioPermissions(){
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED){
             Log.d(LOG_TAG, "Audio Permissions needed!");
