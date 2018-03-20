@@ -10,6 +10,8 @@ import com.paramsen.noise.NoiseOptimized;
 
 import java.util.ArrayDeque;
 
+import io.reactivex.Flowable;
+
 /**
  This Audio Collect Test will
 
@@ -32,10 +34,10 @@ public class AudioCollectTest{
     private static int MIN_FREQ_CALCULATED = 20;
 
     private int mBufferSize = 4096;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
-    private int displaySamples = 40;
+    public static int displaySamples = 100;
 
     public ArrayDeque<short[]> mAudioStream;
-    public ArrayDeque<float[]> fftStream;
+    public final ArrayDeque<float[]> fftStream = new ArrayDeque<float[]>();
     public float[] phase;
     private short[] audioBuffer;
 
@@ -43,7 +45,13 @@ public class AudioCollectTest{
 
     public AudioCollectTest(){
         noise = Noise.real().optimized().init(mBufferSize, true);
+        for (int i=0; i < displaySamples; i++){
+            fftStream.add(new float[]{});
+        }
+    }
 
+    public ArrayDeque<float[]> getFFTStream(){
+        return fftStream;
     }
 
 
@@ -64,10 +72,8 @@ public class AudioCollectTest{
         Log.d(LOG_TAG, "creating array deque for RAW data");
 
         mAudioStream = new ArrayDeque<short[]>();
-        fftStream = new ArrayDeque<float[]>();
         for (int i =0; i < displaySamples; i++){
             mAudioStream.add(audioBuffer);
-            fftStream.add(new float[]{});
         }
 
 
@@ -85,6 +91,7 @@ public class AudioCollectTest{
         }
 
     }
+
 
     public void startRecording(){
         if (mAudioRecord == null || mAudioRecord.getState() != AudioRecord.STATE_INITIALIZED){

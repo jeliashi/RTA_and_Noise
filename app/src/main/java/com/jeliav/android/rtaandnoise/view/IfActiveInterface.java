@@ -9,5 +9,5 @@ import android.view.ViewPropertyAnimator;
 
 public interface IfActiveInterface {
     Canvas ifActive(Canvas canvas);
-    void then();
+    void drawAll();
 }

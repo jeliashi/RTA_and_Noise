@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.jeliav.android.rtaandnoise.AudioTools.AudioCollectTest;
+import com.jeliav.android.rtaandnoise.view.FFTSpectrumSurface;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,8 +21,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_AUDIO_PERMSSION = 200;
 
     public Button mStart;
-    private AudioCollectTest mCollect;
+    public AudioCollectTest mCollect;
+    public FFTSpectrumSurface mSpectrum;
     public boolean isRecording = false;
+    private Thread drawingThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Permissions acquired? " + String.valueOf(requestAudioPermissions()));
         mStart = findViewById(R.id.start_record_button);
         mCollect = new AudioCollectTest();
+        mSpectrum = findViewById(R.id.spectrum_view);
+        mSpectrum.setAudioSource(mCollect);
+        drawSurfaces();
+
 
         mStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,11 +45,13 @@ public class MainActivity extends AppCompatActivity {
                     mCollect.mShouldContinue = false;
                     mCollect.stopRecording();
                     isRecording = false;
+
                 } else {
                     mCollect.mShouldContinue = true;
                     mCollect.startInputStream(MediaRecorder.AudioSource.MIC);
                     mCollect.startRecording();
                     isRecording = true;
+                    drawingThread.start();
                 }
             }
         });
@@ -57,5 +67,16 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_AUDIO_PERMSSION);
         }
         return true;
+    }
+
+    private void drawSurfaces(){
+        drawingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRecording){
+                    mSpectrum.drawAll();
+                }
+            }
+        });
     }
 }

@@ -15,7 +15,7 @@ public class Spectogram {
     private int[] hot = {249, 255, 25};
     private int[] clip = {255, 255, 255};
 
-    private int range = 256;
+    public int range = 256;
     private int EMPTY_LIMIT = range / 10;
     private int COLD_LIMIT = range/5;
     private int WARM_LIMIT = EMPTY_LIMIT*3;

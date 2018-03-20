@@ -139,7 +139,7 @@ public class FFT2D extends BaseSurface {
     }
 
     @Override
-    public void then() {
+    public void drawAll() {
 
     }
 
