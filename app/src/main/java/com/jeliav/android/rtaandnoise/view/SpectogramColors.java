@@ -1,14 +1,11 @@
 package com.jeliav.android.rtaandnoise.view;
 
-import java.lang.reflect.Array;
-import java.util.List;
-
 /**
  * Created by jeliashiv on 3/10/18.
  */
 
-public class Spectogram {
-    public static final String LOG_TAG = Spectogram.class.getSimpleName();
+public class SpectogramColors {
+    public static final String LOG_TAG = SpectogramColors.class.getSimpleName();
     private int[] empty = {20,20,25};
     private int[] cold = {28,135,255};
     private int[] warm = {255, 60, 60};
@@ -23,7 +20,7 @@ public class Spectogram {
     public int[][] color_map = new int[range][3];
 
 
-    public Spectogram(){
+    public SpectogramColors(){
         generate();
     }
 

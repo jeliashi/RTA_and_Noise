@@ -25,7 +25,7 @@ import java.util.List;
  * Created by jeliashiv on 3/19/18.
  */
 
-public class FFTSpectrumSurface extends SpectrumSurface implements IfActiveInterface{
+public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterface {
 
     public static final String LOG_TAG = FFTSpectrumSurface.class.getSimpleName();
 
@@ -41,7 +41,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements IfActiveInter
 
     private AudioCollectTest mAudio;
 
-    private Spectogram spectogram = new Spectogram();
+    private SpectogramColors spectogramColors = new SpectogramColors();
 
     public static final SparseIntArray hotThreshold = new SparseIntArray();
     static{
@@ -80,7 +80,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements IfActiveInter
         for (int i = 0 ; i < height ; i++ ){
             double heightPosNorm = ((double) i)/((double) height);
             int specLegendIndex = ((int) (256f * (1 - heightPosNorm)))%256;
-            int[] legendColors = spectogram.color_map[specLegendIndex];
+            int[] legendColors = spectogramColors.color_map[specLegendIndex];
             int color = Color.rgb(legendColors[0],
                     legendColors[1],
                     legendColors[2]);
@@ -115,8 +115,8 @@ public class FFTSpectrumSurface extends SpectrumSurface implements IfActiveInter
                 for (int j = 0; j < resolution; j++){
                     x = (sampleWidth*j);
                     float magnitude = (freqPoints > 0) ? sampleFFT[j*freqPoints/resolution] : 0f;
-                    int colorIndex = ((int) (((float) spectogram.range ) *   Math.min((magnitude / clip), 1.0)))%spectogram.range;
-                    int[] RGB = spectogram.color_map[colorIndex];
+                    int colorIndex = ((int) (((float) spectogramColors.range ) *   Math.min((magnitude / clip), 1.0)))% spectogramColors.range;
+                    int[] RGB = spectogramColors.color_map[colorIndex];
                     paintSpectogram.setColor(Color.rgb(RGB[0], RGB[1], RGB[2]));
                     canvas.drawRect(x, y- spectrumHeight, x-sampleWidth, y, paintSpectogram);
                 }

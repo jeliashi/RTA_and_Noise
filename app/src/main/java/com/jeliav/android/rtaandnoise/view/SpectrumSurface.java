@@ -1,7 +1,6 @@
 package com.jeliav.android.rtaandnoise.view;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -48,7 +47,7 @@ public class SpectrumSurface extends SurfaceView {
     }
 
 
-    public void drawSurface(IfActiveInterface activeInterface){
+    public void drawSurface(DrawingInterface activeInterface){
         if (active.get()){
             getHolder().unlockCanvasAndPost(activeInterface.ifActive(getHolder().lockCanvas()));
         }
