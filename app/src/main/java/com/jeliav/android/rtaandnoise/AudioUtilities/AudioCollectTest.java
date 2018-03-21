@@ -4,9 +4,6 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.util.Log;
 
-import com.paramsen.noise.Noise;
-import com.paramsen.noise.NoiseOptimized;
-
 import java.util.ArrayDeque;
 
 /**
