@@ -29,8 +29,8 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     // DONE Need to overlay gridlines to main display
     // DONE Need to overlay labels to gridlines in main display
-    // TODO Need to make legend clear and legible
-    // TODO need to convert power into dB
+
+    // TODO need to convert power into dB (sorta done)
 
     public static final String LOG_TAG = FFTSpectrumSurface.class.getSimpleName();
 
@@ -269,19 +269,16 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         long time0 = System.currentTimeMillis();
         drawSpectrum(canvas);
         long time1 = System.currentTimeMillis();
-        drawLegend(canvas);
-        long time2 = System.currentTimeMillis();
         drawTitle(canvas);
-        long time3 = System.currentTimeMillis();
+        long time2 = System.currentTimeMillis();
         drawDisplayMessage(canvas);
-        long time4 = System.currentTimeMillis();
+        long time3 = System.currentTimeMillis();
         drawGridandAxes(this.getContext(), canvas);
-        long time5 = System.currentTimeMillis();
+        long time4 = System.currentTimeMillis();
         whenToDraw.add(time1 - time0);
         whenToDraw.add(time2 - time1);
         whenToDraw.add(time3 - time2);
         whenToDraw.add(time4 - time3);
-        whenToDraw.add(time5- time4);
 
         while (whenToDraw.size() > AudioCollectTest.displaySamples){
             whenToDraw.remove(0);
