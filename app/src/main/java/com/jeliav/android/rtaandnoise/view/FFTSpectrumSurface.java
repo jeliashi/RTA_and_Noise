@@ -12,7 +12,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseIntArray;
 
-import com.jeliav.android.rtaandnoise.AudioTools.AudioCollectTest;
+import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
+import com.jeliav.android.rtaandnoise.AudioUtilities.AudioTools;
 import com.jeliav.android.rtaandnoise.R;
 
 import java.util.ArrayDeque;
@@ -52,7 +53,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     public static final SparseIntArray hotThreshold = new SparseIntArray();
     static{
-        hotThreshold.put(512,200);
+        hotThreshold.put(512,2000);
         hotThreshold.put(256,2500);
         hotThreshold.put(128,3000);
         hotThreshold.put(64,4000);
@@ -105,7 +106,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         float width = (float) this.getWidth();
         float height = (float) this.getHeight();
         ArrayDeque<float[]> fftHistory = mAudio.getFFTStream().clone();
-        float spectrumHeight = height  /((float)AudioCollectTest.displaySamples);
+        float spectrumHeight = height  /((float)AudioTools.displaySamples);
         float sampleWidth = width /  ((float) resolution);
 
         float x,y;
@@ -160,7 +161,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         float x,y;
 //        canvas.drawRect(0, height - getTextPxSize(PAINT_LABEL_SIZE), width, height, textPaint);
         for (float freq : freqLines){
-            x = AudioCollectTest.findFirstInterpGreater(freq) * (float) width;
+            x = AudioTools.findFirstInterpGreater(freq) * (float) width;
             canvas.drawLine(x, 0, x,(float) height, errPaint);
             canvas.drawText(niceAxesDisplay(freq), x - labelPaint.measureText(niceAxesDisplay(freq))/2, height, labelPaint);
             canvas.drawText(niceAxesDisplay(freq), x - labelPaint.measureText(niceAxesDisplay(freq))/2, getTextPxSize(PAINT_LABEL_SIZE), labelPaint);
@@ -255,7 +256,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         }
 
         if (canDrawSpectogram() &&
-                whenToDraw.size() >= AudioCollectTest.displaySamples / 5 &&
+                whenToDraw.size() >= AudioTools.displaySamples / 5 &&
                 avgDrawTime() > fps) {
             whenToDraw = null;
             resolution /= 2;
@@ -280,7 +281,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         whenToDraw.add(time3 - time2);
         whenToDraw.add(time4 - time3);
 
-        while (whenToDraw.size() > AudioCollectTest.displaySamples){
+        while (whenToDraw.size() > AudioTools.displaySamples){
             whenToDraw.remove(0);
         }
 

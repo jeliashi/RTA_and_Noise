@@ -11,7 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.jeliav.android.rtaandnoise.AudioTools.AudioCollectTest;
+import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
+import com.jeliav.android.rtaandnoise.AudioUtilities.Generator;
 import com.jeliav.android.rtaandnoise.view.FFTSpectrumSurface;
 
 
@@ -33,7 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_AUDIO_PERMSSION = 200;
 
     public Button mStart;
+    public Button mGenerateButton;
     public AudioCollectTest mCollect;
+    public Generator mGenerate;
     public FFTSpectrumSurface mSpectrum;
     public boolean isRecording = false;
     private Thread drawingThread;
@@ -44,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.d(LOG_TAG, "Permissions acquired? " + String.valueOf(requestAudioPermissions()));
         mStart = findViewById(R.id.start_record_button);
+        mGenerateButton = findViewById(R.id.pink_noise_button);
         mCollect = new AudioCollectTest();
+        mGenerate = new Generator();
         mSpectrum = findViewById(R.id.spectrum_view);
         mSpectrum.setAudioSource(mCollect);
 
@@ -63,6 +68,17 @@ public class MainActivity extends AppCompatActivity {
                     mCollect.startRecording();
                     isRecording = true;
                     beginDrawing();
+                }
+            }
+        });
+        mGenerateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mGenerate.mShouldContinue){
+                    mGenerate.stop();
+                } else{
+                    mGenerate.mShouldContinue = true;
+                    mGenerate.begin();
                 }
             }
         });
