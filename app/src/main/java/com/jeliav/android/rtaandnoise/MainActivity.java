@@ -17,6 +17,18 @@ import com.jeliav.android.rtaandnoise.view.FFTSpectrumSurface;
 
 public class MainActivity extends AppCompatActivity {
 
+    // TODO need to handle lifetime cycles
+    // TODO need to add dB meter with dBC of the past 5 seconds displayed on it
+    // TODO to handle shared settings of: audio input, audio gain, level clip
+
+    // TODO need to add audio generator
+    // TODO need to add shared settings for audio generator
+
+    // TODO need new activity with intent which measures transfer function, delay, and coherence
+    // TODO need to add transfer function display
+    // TODO need to add phase plot display
+    // TODO need to add coherence measurement display
+
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_AUDIO_PERMSSION = 200;
 
@@ -35,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         mCollect = new AudioCollectTest();
         mSpectrum = findViewById(R.id.spectrum_view);
         mSpectrum.setAudioSource(mCollect);
-        drawSurfaces();
 
 
         mStart.setOnClickListener(new View.OnClickListener() {
@@ -51,10 +62,28 @@ public class MainActivity extends AppCompatActivity {
                     mCollect.startInputStream(MediaRecorder.AudioSource.MIC);
                     mCollect.startRecording();
                     isRecording = true;
-                    drawingThread.start();
+                    beginDrawing();
                 }
             }
         });
+    }
+
+    private void beginDrawing(){
+        drawSurfaces();
+        Thread.State drawState = drawingThread.getState();
+        Log.d(LOG_TAG, "drawing state: " + drawState.toString());
+        switch (drawState){
+            case NEW:
+                drawingThread.start();
+                break;
+            case TERMINATED:
+                drawingThread.start();
+                break;
+            default:
+                drawingThread.interrupt();
+                drawingThread.start();
+                break;
+        }
     }
 
 
@@ -77,6 +106,6 @@ public class MainActivity extends AppCompatActivity {
                     mSpectrum.drawAll();
                 }
             }
-        });
+        }, "Drawing Thread");
     }
 }

@@ -22,14 +22,20 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by jeliashiv on 3/19/18.
+ The dynamic view of the sound
  */
 
 public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterface {
 
+    // DONE Need to overlay gridlines to main display
+    // DONE Need to overlay labels to gridlines in main display
+    // TODO Need to make legend clear and legible
+    // TODO need to convert power into dB
+
     public static final String LOG_TAG = FFTSpectrumSurface.class.getSimpleName();
 
     private static final float PAINT_TEXT_SIZE = 12f;
+    private static final float PAINT_LABEL_SIZE = 8f;
     public static int background;
     public static int resolution =  512;
     public static int minResolution = 64;
@@ -38,6 +44,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
     public static Paint paintSpectogram = new Paint();
     public static Paint textPaint = new Paint();
     public static Paint errPaint = new Paint();
+    public static Paint labelPaint = new Paint();
 
     private AudioCollectTest mAudio;
 
@@ -45,12 +52,11 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     public static final SparseIntArray hotThreshold = new SparseIntArray();
     static{
-        hotThreshold.put(512,15000);
-        hotThreshold.put(256,15000);
-        hotThreshold.put(128,30000);
-        hotThreshold.put(64,45000);
+        hotThreshold.put(512,200);
+        hotThreshold.put(256,2500);
+        hotThreshold.put(128,3000);
+        hotThreshold.put(64,4000);
     }
-
     private List<Long> whenToDraw =  new ArrayList<Long>();
 
     public static Pair<Long, String> message;
@@ -62,6 +68,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         setSpecPaint(context, paintSpectogram);
         setTextPaint(context, textPaint);
         setErrPaint(context, errPaint);
+        setLabelPaint(context, labelPaint);
     }
 
     public void setAudioSource(AudioCollectTest audioCollectTest){
@@ -103,7 +110,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
         float x,y;
         float[] sampleFFT;
-        int clip = 80;
+        float clip = (float) Math.log((float) hotThreshold.get(resolution));
         int i = 0;
         Iterator<float[]> fftIterator = fftHistory.iterator();
         while (fftIterator.hasNext()) {
@@ -115,7 +122,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
                 for (int j = 0; j < resolution; j++){
                     x = (sampleWidth*j);
                     float magnitude = (freqPoints > 0) ? sampleFFT[j*freqPoints/resolution] : 0f;
-                    int colorIndex = ((int) (((float) spectogramColors.range ) *   Math.min((magnitude / clip), 1.0)))% spectogramColors.range;
+                    int colorIndex = ((int) (((float) spectogramColors.range ) *   Math.min(Math.max(magnitude/clip, 0.0f), 1.0f)))% spectogramColors.range;
                     int[] RGB = spectogramColors.color_map[colorIndex];
                     paintSpectogram.setColor(Color.rgb(RGB[0], RGB[1], RGB[2]));
                     canvas.drawRect(x, y- spectrumHeight, x-sampleWidth, y, paintSpectogram);
@@ -129,6 +136,44 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
         }
 
+    }
+
+    private void drawGridandAxes(Context context, Canvas canvas){
+        float[] freqLines;
+        switch (resolution){
+            case 512:
+                freqLines = new float[]{25f, 31f, 40f, 50f, 63f, 80f, 100f, 125f, 160f, 200f, 250f, 310f, 400f,
+                500f, 630f, 800f, 1000f, 1250f, 1600f, 2000f, 2500f, 3100f, 4000f, 5000f, 6300f,8000f, 10000f, 12500f, 16000f};
+                break;
+            case 256:
+                freqLines = new float[]{31f, 63f, 125f, 250f, 500f, 1000f, 2000f, 4000f, 8000f, 16000f};
+                break;
+            case 128:
+                freqLines = new float[]{63f, 250f, 1000f, 4000f, 16000f};
+                break;
+            default:
+                freqLines = new float[]{63f, 250f, 1000f, 4000f, 16000f};
+                break;
+        }
+        int height = getHeight();
+        int width = getWidth();
+        float x,y;
+//        canvas.drawRect(0, height - getTextPxSize(PAINT_LABEL_SIZE), width, height, textPaint);
+        for (float freq : freqLines){
+            x = AudioCollectTest.findFirstInterpGreater(freq) * (float) width;
+            canvas.drawLine(x, 0, x,(float) height, errPaint);
+            canvas.drawText(niceAxesDisplay(freq), x - labelPaint.measureText(niceAxesDisplay(freq))/2, height, labelPaint);
+            canvas.drawText(niceAxesDisplay(freq), x - labelPaint.measureText(niceAxesDisplay(freq))/2, getTextPxSize(PAINT_LABEL_SIZE), labelPaint);
+        }
+
+    }
+
+    private String niceAxesDisplay(float freq){
+        if (freq < 1000){
+            return String.valueOf((int) freq);
+        } else if ((freq%1000f == 0f)){
+            return (String.valueOf( (int) freq /1000) + "k");
+        } else return (String.valueOf((int) freq/1000) + "." + String.valueOf((freq%1000f)/100).substring(0,1) + "k");
     }
 
     private void drawDisplayMessage(Canvas canvas){
@@ -150,6 +195,13 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         paint.setColor(context.getResources().getColor(R.color.textPaint));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextSize(getTextPxSize(PAINT_TEXT_SIZE));
+        paint.setTypeface(Typeface.MONOSPACE);
+    }
+
+    private void setLabelPaint(Context context, Paint paint){
+        paint.setColor(context.getResources().getColor(R.color.textPaint));
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(getTextPxSize(PAINT_LABEL_SIZE));
         paint.setTypeface(Typeface.MONOSPACE);
     }
 
@@ -190,6 +242,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     @Override
     public Canvas ifActive(Canvas canvas) {
+        if (null == canvas) return canvas;
         canvas.drawColor(background);
         if (!(canDrawSpectogram())){
             String gpu_warn_string = "Memory low";
@@ -222,11 +275,13 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         long time3 = System.currentTimeMillis();
         drawDisplayMessage(canvas);
         long time4 = System.currentTimeMillis();
+        drawGridandAxes(this.getContext(), canvas);
+        long time5 = System.currentTimeMillis();
         whenToDraw.add(time1 - time0);
         whenToDraw.add(time2 - time1);
         whenToDraw.add(time3 - time2);
         whenToDraw.add(time4 - time3);
-
+        whenToDraw.add(time5- time4);
 
         while (whenToDraw.size() > AudioCollectTest.displaySamples){
             whenToDraw.remove(0);

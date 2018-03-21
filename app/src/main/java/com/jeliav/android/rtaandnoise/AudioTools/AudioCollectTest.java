@@ -2,7 +2,6 @@ package com.jeliav.android.rtaandnoise.AudioTools;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.paramsen.noise.Noise;
@@ -10,13 +9,16 @@ import com.paramsen.noise.NoiseOptimized;
 
 import java.util.ArrayDeque;
 
-import io.reactivex.Flowable;
-
 /**
  This Audio Collect Test will
-
-
+Collects at sample sizes of 4096 at 44100 which correlates to a min freq of 21.53 Hz
+ and a max freq of 22050 Hz
+ Let's regrid this to
+ 25 31 40 50 63 80 100 125 160 200 250 310 400 500 630 800 1000
+ 1250 1600 2000 2500 3100 4000 5000 6300 8000 10k 12.5k 15k 20k
+Hz
  */
+
 
 public class AudioCollectTest{
 
@@ -30,8 +32,7 @@ public class AudioCollectTest{
 
     private AudioRecord mAudioRecord;
     public Thread collectThread;
-
-    private static int MIN_FREQ_CALCULATED = 20;
+    private static final int outputFFTLength = 1025;
 
     private int mBufferSize = 4096;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
     public static int displaySamples = 100;
@@ -41,6 +42,19 @@ public class AudioCollectTest{
     public float[] phase;
     private short[] audioBuffer;
 
+    private float[] initialDist = new float[mBufferSize/4 + 1];
+    public static final float[] finalDist = new float[outputFFTLength];
+    static{
+        float intialFreq = 20f;
+        float finalFreq = 20000f;
+        float init_log = (float) Math.log10(intialFreq);
+        float final_log = (float) Math.log10(finalFreq);
+        float diff_log = (final_log - init_log) / (((float) outputFFTLength ) - 1);
+        for (int i = 0; i < outputFFTLength; i++){
+            finalDist[i] = (float) Math.pow(10, init_log + (((float) i) * diff_log));
+        }
+    }
+
     private NoiseOptimized noise;
 
     public AudioCollectTest(){
@@ -48,6 +62,11 @@ public class AudioCollectTest{
         for (int i=0; i < displaySamples; i++){
             fftStream.add(new float[]{});
         }
+        for (int i =  0; i < (mBufferSize+1)/4 ; i++){
+            initialDist[i] = (2f * (float) i * (float) AUDIO_INPUT_SAMP_RATE / (float) mBufferSize);
+        }
+        Log.d(LOG_TAG, initialDist.toString());
+        Log.d(LOG_TAG, finalDist.toString());
     }
 
     public ArrayDeque<float[]> getFFTStream(){
@@ -107,8 +126,36 @@ public class AudioCollectTest{
             }
         }, "Audio Record Thread");
         collectThread.start();
+    }
 
+    private int findFirstGreater(float input){
+        for (int i = 0; i < initialDist.length; i++ ) {
+            float compVal = initialDist[i];
+            if (input < compVal) return i;
+        }
+        return initialDist.length - 1;
+    }
 
+    public static float findFirstInterpGreater(float input){
+        for (int i=0; i < finalDist.length; i++){
+            float compval = finalDist[i];
+            if (input < compval) return ((float) i/ (float) finalDist.length);
+        }
+        return 1f;
+    }
+
+    private float[] linearInterpolation(float[] input){
+        float[] outMag = new float[outputFFTLength];
+        int i = 0;
+        for (float freq : finalDist){
+            int upperIndex = findFirstGreater(freq);
+            float upper = initialDist[upperIndex];
+            float lower = initialDist[upperIndex - 1];
+            float frac = (freq - lower) / (upper - lower);
+            outMag[i] = (1f- frac) * input[upperIndex - 1] + frac * input[upperIndex];
+            i++;
+        }
+        return outMag;
     }
 
     private void calculateFFT(short[] inputAudio){
@@ -128,12 +175,16 @@ public class AudioCollectTest{
             float real = fft[i*2];
             float imag = fft[i*2+ 1];
 
-            fft_power[i] = (float) Math.sqrt((real*real + imag*imag));
+            fft_power[i] = (float) Math.log(Math.sqrt((real*real + imag*imag)));
             fft_phase[i] = (float) Math.atan2(imag,real);
         }
-        updateArrays(fft_power, fft_phase);
+
+        float[] test = linearInterpolation(fft_power);
+        updateArrays(test, fft_phase);
 
     }
+
+
 
     private void updateArrays(float[] power, float[] new_phase){
         fftStream.removeLast();

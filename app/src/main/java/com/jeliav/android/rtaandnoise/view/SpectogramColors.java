@@ -1,7 +1,7 @@
 package com.jeliav.android.rtaandnoise.view;
 
 /**
- * Created by jeliashiv on 3/10/18.
+ the array of colors for the spectogram and how they would be shown
  */
 
 public class SpectogramColors {

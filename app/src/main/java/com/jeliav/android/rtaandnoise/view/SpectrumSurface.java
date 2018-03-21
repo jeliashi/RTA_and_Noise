@@ -8,7 +8,7 @@ import android.view.SurfaceView;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by jeliashiv on 3/19/18.
+ The base surface type for things to be displayed on
  */
 
 public class SpectrumSurface extends SurfaceView {
@@ -30,22 +30,27 @@ public class SpectrumSurface extends SurfaceView {
         getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                active.set(true);
+                synchronized (this){
+                    active.set(true);
+                    this.notifyAll();
+                }
             }
 
             @Override
-            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
+            public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-                active.set(false);
-
+                synchronized (this){
+                    active.set(false);
+                    this.notifyAll();
+                }
             }
+
+
         });
     }
-
 
     public void drawSurface(DrawingInterface activeInterface){
         if (active.get()){
