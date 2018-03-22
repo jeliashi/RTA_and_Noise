@@ -11,13 +11,10 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseIntArray;
 
-import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
 import com.jeliav.android.rtaandnoise.AudioUtilities.AudioTools;
 import com.jeliav.android.rtaandnoise.R;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  The dynamic view of the sound
@@ -34,7 +31,6 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     private static final float PAINT_TEXT_SIZE = 12f;
     private static final float PAINT_LABEL_SIZE = 8f;
-    public static int background;
     public static int resolution =  512;
     public static int minResolution = 64;
 
@@ -43,33 +39,24 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
     public static Paint errPaint = new Paint();
     public static Paint labelPaint = new Paint();
 
-    private AudioCollectTest mAudio;
-
     private SpectrogramColors spectrogramColors = new SpectrogramColors();
 
     public static final SparseIntArray hotThreshold = new SparseIntArray();
     static{
-        hotThreshold.put(512,2000);
-        hotThreshold.put(256,2500);
-        hotThreshold.put(128,3000);
-        hotThreshold.put(64,4000);
+        hotThreshold.put(512,1000);
+        hotThreshold.put(256,1200);
+        hotThreshold.put(128,1500);
+        hotThreshold.put(64,2000);
     }
-    public List<Long> whenToDraw =  new ArrayList<>();
 
     public static Pair<Long, String> message;
-    public Pair<Long, Integer> lastPaintTimeAvg = new Pair<>(System.currentTimeMillis(), 0);
 
     public FFTSpectrumSurface(Context context, @Nullable  AttributeSet attributeSet) {
         super(context, attributeSet);
-        background = context.getResources().getColor(R.color.background);
         setSpecPaint(context, paintSpectogram);
         setTextPaint(context, textPaint);
         setErrPaint(context, errPaint);
         setLabelPaint(context, labelPaint);
-    }
-
-    public void setAudioSource(AudioCollectTest audioCollectTest){
-        mAudio = audioCollectTest;
     }
 
     private void drawTitle(Canvas canvas){
@@ -101,7 +88,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
     private void drawSpectrum(Canvas canvas){
         float width = (float) this.getWidth();
         float height = (float) this.getHeight();
-        ArrayDeque<float[]> fftHistory = mAudio.getFFTStream().clone();
+        ArrayDeque<float[]> fftHistory = mInput.getFFTStream().clone();
         float spectrumHeight = height  /((float)AudioTools.displaySamples);
         float sampleWidth = width /  ((float) resolution);
 
@@ -201,22 +188,6 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     private boolean canDrawSpectogram(){
         return (resolution >= minResolution);
-    }
-
-    public int avgDrawTime(){
-        if (System.currentTimeMillis() - lastPaintTimeAvg.first > 1000){
-            lastPaintTimeAvg = new Pair<>(System.currentTimeMillis(),
-                    (whenToDraw.size() > 0) ? DrawAverage(whenToDraw) : 0);
-        }
-        return lastPaintTimeAvg.second;
-    }
-
-    private int DrawAverage(List<Long> mArray){
-        int sum = 0;
-        for (long l : mArray){
-            sum += (int) l;
-        }
-        return sum / mArray.size();
     }
 
     public long averageDrawingTime(){

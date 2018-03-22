@@ -3,6 +3,8 @@ package com.jeliav.android.rtaandnoise.AudioUtilities;
 import android.media.AudioFormat;
 import android.util.Log;
 
+import java.util.ArrayDeque;
+
 /**
  Easier to store all the audio tools in here
  */
@@ -11,7 +13,7 @@ public class AudioTools {
     static final int AUDIO_SAMPLE_RATE = 44100;
     static final int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     static int BufferSize = 4096;
-    public static final int displaySamples = 20;
+    public static final int displaySamples = 50;
     static final int outputFFTLength = BufferSize/2;
 
     private static KissFFTWrapper fftWrapper;
@@ -109,6 +111,54 @@ public class AudioTools {
 
         return new ComplexRadialArray(linearInterpolation(power),  linearInterpolation(phase));
 
+    }
+
+    public static float[] caculatePhaseFromFFT(float[] inMag, float[] inPhase, float[] outMag, float[] outPhase){
+        if (inMag.length != inPhase.length ||
+                inMag.length != outMag.length ||
+                inMag.length != outPhase.length){
+            throw new IndexOutOfBoundsException(String.format("All arrays must have same length (%d %d %d %d).", inMag.length, inPhase.length, outMag.length, outPhase.length));
+        }
+
+        float[] out = new float[inMag.length];
+        float workMag, workPhase, workReal, workImag;
+
+        for (int i = 0; i < inMag.length ; i++ ) {
+            if (outMag[i] == 0) out[i] = 0;
+            else {
+                workMag = inMag[i] / outMag[i];
+                workPhase = (float) ((inPhase[i] - outPhase[i] + Math.PI) % (2 * Math.PI) - Math.PI);
+                workReal = workMag * (float) Math.cos(workPhase) - outMag[i];
+                workImag = workMag * (float) Math.cos(workPhase);
+                out[i] = (float) Math.atan2(workImag, workReal);
+            }
+        }
+        return out;
+    }
+
+    public static float[] calculateCoherence(ArrayDeque<float[]> inMag, ArrayDeque<float[]> outMag){
+        float[] out = new float[finalDist.length];
+        float[] Cxy = calculateCorr(inMag.clone(), outMag.clone());
+        float[] Cxx = calculateCorr(inMag.clone(), inMag.clone());
+        float[] Cyy = calculateCorr(outMag.clone(), outMag.clone());
+
+        for (int i = 0 ; i < out.length; i++){
+            out[i] = Cxy[i] / (Cxx[i] * Cyy[i]);
+        }
+
+        return out;
+    }
+
+    private static float[] calculateCorr(ArrayDeque<float[]> inMag, ArrayDeque<float[]> outMag){
+        float[] out = new float[finalDist.length];
+        for (float[] inArray : inMag){
+            float[] outArray = outMag.poll();
+            if (inArray.length == 0 || outArray.length ==0) return out;
+            for (int j = 0 ; j < finalDist.length ; j++){
+                out[j] += inArray[j]*outArray[j] / (float) displaySamples;
+            }
+        }
+        return out;
     }
 
 

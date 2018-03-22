@@ -7,16 +7,12 @@ import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 
-import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
 import com.jeliav.android.rtaandnoise.AudioUtilities.AudioTools;
-import com.jeliav.android.rtaandnoise.AudioUtilities.Generator;
 import com.jeliav.android.rtaandnoise.R;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
 Shows the frequency dependent difference in normalized power of input and output
@@ -28,21 +24,13 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
 
     private static final float PAINT_TEXT_SIZE = 12f;
     private static final float PAINT_LABEL_SIZE = 8f;
-    public static int background;
 
     public static Paint linePaint = new Paint();
     public static Paint textPaint = new Paint();
     public static Paint labelPaint = new Paint();
 
-    private AudioCollectTest mInput;
-    private Generator mOutput;
-
-    private List<Long> whenToDraw = new ArrayList<>();
-    public Pair<Long, Integer> lastPastTimeAvg = new Pair<>(System.currentTimeMillis(), 0);
-
     public TransferDisplaySurface(Context context, @Nullable AttributeSet attributeSet) {
         super(context, attributeSet);
-        background = context.getResources().getColor(R.color.background);
         setLinePaint(context, linePaint);
         setTextPaint(context, textPaint);
         setLabelPaint(context, labelPaint);
@@ -110,13 +98,6 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
                 textPaint);
     }
 
-    public void setInputSource(AudioCollectTest input){
-        mInput = input;
-    }
-    public void setOutputSource(Generator output){
-        mOutput = output;
-    }
-
     private void setLinePaint(Context context, Paint paint){
         paint.setColor(context.getResources().getColor(R.color.textPaint));
         paint.setStyle(Paint.Style.STROKE);
@@ -133,22 +114,6 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
         paint.setStyle(Paint.Style.FILL);
         paint.setTextSize(getTextPxSize(PAINT_LABEL_SIZE));
         paint.setTypeface(Typeface.MONOSPACE);
-    }
-
-    private int avgDrawTime(){
-        if (System.currentTimeMillis() - lastPastTimeAvg.first > 1000){
-            lastPastTimeAvg = new Pair<>(System.currentTimeMillis(),
-                    (whenToDraw.size() > 0) ? DrawAverage(whenToDraw) : 0);
-        }
-        return lastPastTimeAvg.second;
-    }
-
-    private int DrawAverage(List<Long> mArray){
-        int sum = 0;
-        for (long l : mArray){
-            sum+= (int) l;
-        }
-        return sum / mArray.size();
     }
 
     @Override

@@ -13,7 +13,9 @@ import android.widget.Button;
 
 import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
 import com.jeliav.android.rtaandnoise.AudioUtilities.Generator;
+import com.jeliav.android.rtaandnoise.view.CoherenceDisplaySurface;
 import com.jeliav.android.rtaandnoise.view.FFTSpectrumSurface;
+import com.jeliav.android.rtaandnoise.view.PhaseDisplaySurface;
 import com.jeliav.android.rtaandnoise.view.TransferDisplaySurface;
 
 
@@ -28,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO need new activity with intent which measures transfer function, delay, and coherence
     // DONE need to add transfer function display
-    // TODO need to add phase plot display
-    // TODO need to add coherence measurement display
+    // DONE need to add phase plot display
+    // DONE need to add coherence measurement display
     // TODO need to make UI dynamic
 
     // TODO need to make a thread pool for the drawing and separate all the surface draws into different threads
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     public Generator mGenerate;
     public FFTSpectrumSurface mSpectrum;
     public TransferDisplaySurface mTransfer;
+    public PhaseDisplaySurface mPhase;
+    public CoherenceDisplaySurface mCoherence;
     public boolean isRecording = false;
     private static Thread drawingThread;
 
@@ -56,10 +60,16 @@ public class MainActivity extends AppCompatActivity {
         mCollect = new AudioCollectTest();
         mGenerate = new Generator();
         mSpectrum = findViewById(R.id.spectrum_view);
-        mSpectrum.setAudioSource(mCollect);
+        mSpectrum.setInputSource(mCollect);
         mTransfer = findViewById(R.id.transfer_view);
         mTransfer.setInputSource(mCollect);
         mTransfer.setOutputSource(mGenerate);
+        mPhase = findViewById(R.id.phase_view);
+        mPhase.setInputSource(mCollect);
+        mPhase.setOutputSource(mGenerate);
+        mCoherence = findViewById(R.id.coherence_view);
+        mCoherence.setInputSource(mCollect);
+        mCoherence.setOutputSource(mGenerate);
 
         mStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                 while (isRecording){
                     mSpectrum.drawAll();
                     mTransfer.drawAll();
+                    mPhase.drawAll();
+                    mCoherence.drawAll();
                     if (mSpectrum.averageDrawingTime() < 80 && mSpectrum.whenToDraw.size() > 3){
                         try{
                             drawingThread.sleep(200);
