@@ -4,23 +4,23 @@ package com.jeliav.android.rtaandnoise.view;
  the array of colors for the spectogram and how they would be shown
  */
 
-public class SpectogramColors {
-    public static final String LOG_TAG = SpectogramColors.class.getSimpleName();
+class SpectrogramColors {
+//    public static final String LOG_TAG = SpectrogramColors.class.getSimpleName();
     private int[] empty = {20,20,25};
     private int[] cold = {28,135,255};
     private int[] warm = {255, 60, 60};
     private int[] hot = {249, 255, 25};
     private int[] clip = {255, 255, 255};
 
-    public int range = 256;
+    int range = 256;
     private int EMPTY_LIMIT = range / 10;
     private int COLD_LIMIT = range/5;
     private int WARM_LIMIT = EMPTY_LIMIT*3;
 
-    public int[][] color_map = new int[range][3];
+    int[][] color_map = new int[range][3];
 
 
-    public SpectogramColors(){
+    SpectrogramColors(){
         generate();
     }
 

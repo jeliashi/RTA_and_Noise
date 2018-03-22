@@ -23,13 +23,16 @@ public class MainActivity extends AppCompatActivity {
     // TODO need to add dB meter with dBC of the past 5 seconds displayed on it
     // TODO to handle shared settings of: audio input, audio gain, level clip
 
-    // TODO need to combine audio receive with audio generator thread
+    // TODO need to combine audio receive with audio generator thread or maybe not
     // TODO need to add shared settings for audio generator
 
     // TODO need new activity with intent which measures transfer function, delay, and coherence
-    // TODO need to add transfer function display
+    // DONE need to add transfer function display
     // TODO need to add phase plot display
     // TODO need to add coherence measurement display
+    // TODO need to make UI dynamic
+
+    // TODO need to make a thread pool for the drawing and separate all the surface draws into different threads
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_AUDIO_PERMSSION = 200;
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public FFTSpectrumSurface mSpectrum;
     public TransferDisplaySurface mTransfer;
     public boolean isRecording = false;
-    private Thread drawingThread;
+    private static Thread drawingThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

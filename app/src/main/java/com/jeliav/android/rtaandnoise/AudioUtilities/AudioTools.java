@@ -2,19 +2,17 @@ package com.jeliav.android.rtaandnoise.AudioUtilities;
 
 import android.media.AudioFormat;
 import android.util.Log;
-import android.util.Pair;
-
 
 /**
  Easier to store all the audio tools in here
  */
 
 public class AudioTools {
-    public static final int AUDIO_SAMPLE_RATE = 44100;
-    public static final int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    public static int BufferSize = 4096;
+    static final int AUDIO_SAMPLE_RATE = 44100;
+    static final int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+    static int BufferSize = 4096;
     public static final int displaySamples = 20;
-    public static final int outputFFTLength = BufferSize/2;
+    static final int outputFFTLength = BufferSize/2;
 
     private static KissFFTWrapper fftWrapper;
     static{
@@ -79,7 +77,6 @@ public class AudioTools {
         double[] fft =  fftWrapper.fft(inputFloat);
 
         float[] fft_power = new float[initialDist.length];
-//        Log.d("FFT", String.valueOf(fft.length) + " vs " + String.valueOf(test.length));
         for (int i =0; i < (initialDist.length); i++){
             double real = fft[i*2];
             double imag = fft[i*2+ 1];
@@ -90,7 +87,7 @@ public class AudioTools {
         return linearInterpolation(fft_power);
     }
 
-    public static ComplexRadialArray calculateComplexFFT(short[] inputAudio){
+    static ComplexRadialArray calculateComplexFFT(short[] inputAudio){
 
         float[] inputFloat = new float[inputAudio.length];
         for (int i = 0; i < inputAudio.length; i++){
@@ -115,10 +112,10 @@ public class AudioTools {
     }
 
 
-    public static class ComplexRadialArray{
+    static class ComplexRadialArray{
         float[] magnitude;
         float[] phase;
-        public  ComplexRadialArray(float[] mag, float[] phi){
+        ComplexRadialArray(float[] mag, float[] phi){
             this.magnitude = mag;
             this.phase = phi;
         }

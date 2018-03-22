@@ -1,10 +1,9 @@
 package com.jeliav.android.rtaandnoise.view;
 
 import android.graphics.Canvas;
-import android.view.ViewPropertyAnimator;
 
 /**
- * Created by jeliashiv on 3/9/18.
+ Interface to allow drawing surfaces to interact with their parent simple surface
  */
 
 public interface DrawingInterface {

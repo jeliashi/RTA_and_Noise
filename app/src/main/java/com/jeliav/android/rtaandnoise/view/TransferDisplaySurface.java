@@ -16,7 +16,6 @@ import com.jeliav.android.rtaandnoise.R;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,7 +29,6 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
     private static final float PAINT_TEXT_SIZE = 12f;
     private static final float PAINT_LABEL_SIZE = 8f;
     public static int background;
-    private int fps = 80;
 
     public static Paint linePaint = new Paint();
     public static Paint textPaint = new Paint();
@@ -155,10 +153,11 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
 
     @Override
     public Canvas ifActive(Canvas canvas) {
-        if (null == canvas) return canvas;
+        int minimimDrawTimeThreshold = 80;
+        if (null == canvas) return null;
         canvas.drawColor(background);
         if (whenToDraw.size() >= AudioTools.displaySamples &&
-                avgDrawTime() > fps) {
+                avgDrawTime() > minimimDrawTimeThreshold) {
             Log.w(LOG_TAG, "drawing too quickly");
             whenToDraw = null;
 

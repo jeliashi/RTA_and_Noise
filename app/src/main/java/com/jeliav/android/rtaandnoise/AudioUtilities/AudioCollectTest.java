@@ -21,20 +21,15 @@ public class AudioCollectTest{
 
     private static final String LOG_TAG = AudioCollectTest.class.getSimpleName();
 
-    public static int AUDIO_INPUT_SAMP_RATE = AudioTools.AUDIO_SAMPLE_RATE;
-    private int AUDIO_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-    public static int AUDIO_ENCODING = AudioTools.AUDIO_ENCODING;
-
     public boolean mShouldContinue;
 
     private AudioRecord mAudioRecord;
-    public Thread collectThread;
 
-    public static int mBufferSize = AudioTools.BufferSize;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
+    private static int mBufferSize = AudioTools.BufferSize;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
 
-    public short[] mAudioStream;
-    public final ArrayDeque<float[]> fftStream = new ArrayDeque<float[]>();
-    public final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<float[]>();
+    private short[] mAudioStream;
+    private final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
+    private final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
     private short[] audioBuffer;
 
     public AudioCollectTest(){
@@ -47,9 +42,13 @@ public class AudioCollectTest{
     public ArrayDeque<float[]> getFFTStream(){
         return fftStream;
     }
+    public ArrayDeque<float[]> getFFTPhaseStream() { return fftPhaseStream; }
     public short[] getAudioStream() { return mAudioStream; }
 
     public void startInputStream(int audio_source) {
+        int AUDIO_INPUT_SAMP_RATE = AudioTools.AUDIO_SAMPLE_RATE;
+        int AUDIO_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+        int AUDIO_ENCODING = AudioTools.AUDIO_ENCODING;
 
         if (mBufferSize == AudioRecord.ERROR_BAD_VALUE || mBufferSize == AudioRecord.ERROR){
             mBufferSize = AUDIO_INPUT_SAMP_RATE*2;
@@ -81,7 +80,7 @@ public class AudioCollectTest{
         }
         mAudioRecord.startRecording();
 
-        collectThread =  new Thread(new Runnable() {
+        Thread collectThread =  new Thread(new Runnable() {
             @Override
             public void run() {
                 readMic();

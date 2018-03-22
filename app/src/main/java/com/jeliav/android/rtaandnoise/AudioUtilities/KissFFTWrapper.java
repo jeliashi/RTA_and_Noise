@@ -1,7 +1,7 @@
 package com.jeliav.android.rtaandnoise.AudioUtilities;
 
 /**
- * Created by jeliashiv on 3/21/18.
+A Wrapper for the C++ FFT functionality that uses C code to calculate complex ffts
  */
 
 public class KissFFTWrapper {
@@ -9,13 +9,12 @@ public class KissFFTWrapper {
         System.loadLibrary("kiss-fft-lib");
     }
 
-    public KissFFTWrapper(){
+    KissFFTWrapper(){
 
     }
 
     public double[] fft(float[] input){
-        boolean isForward = true;
-        return fft(input, isForward);
+        return fft(input, true);
     }
 
     public double[] fft(float[] input, boolean isForward){

@@ -16,11 +16,10 @@ import java.util.Random;
 
 public class Generator {
 
-    public static final String LOG_TAG = Generator.class.getSimpleName();
+    private static final String LOG_TAG = Generator.class.getSimpleName();
 
-    public static int AUDIO_OUTPUT_SAMPLE_RATE = AudioTools.AUDIO_SAMPLE_RATE;
-    public static int AUDIO_ENCODING = AudioTools.AUDIO_ENCODING;
-    public static int mBufferSize = AudioTools.BufferSize;
+    private static int AUDIO_OUTPUT_SAMPLE_RATE = AudioTools.AUDIO_SAMPLE_RATE;
+    private static int mBufferSize = AudioTools.BufferSize;
 
     private AudioTrack audioTrack = null;
 
@@ -32,11 +31,11 @@ public class Generator {
     private short MAX_AMPLITUDE = Short.MAX_VALUE;
 
     private Random random = new Random();
-    public short[] mAudioStream;
-    public final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
-    public final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
+    private short[] mAudioStream;
+    private final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
+    private final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
 
-    public Thread produceThread;
+    private Thread produceThread;
 
     public Generator(){
         mBuffer = new short[mBufferSize];
@@ -50,6 +49,7 @@ public class Generator {
     }
 
     private void initializeOutput(){
+        int AUDIO_ENCODING = AudioTools.AUDIO_ENCODING;
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 AUDIO_OUTPUT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_DEFAULT,
                 AUDIO_ENCODING, mBufferSize,
@@ -65,7 +65,7 @@ public class Generator {
 
     }
 
-    public void generateSineTone(float freq){
+    private void generateSineTone(float freq){
         float dPhase = freq / (float) AUDIO_OUTPUT_SAMPLE_RATE;
         for (int i=0 ; i < mBufferSize; i++){
             mBuffer[i] = (short)( Math.sin(2*Math.PI *phase) * MAX_AMPLITUDE);
@@ -74,13 +74,13 @@ public class Generator {
         }
     }
 
-    public void generateWhiteNoise(){
+    private void generateWhiteNoise(){
         for (int i=0; i < mBufferSize; i++){
             mBuffer[i] = (short) random.nextGaussian();
             }
     }
 
-    public void generatePinkNoise(){
+    private void generatePinkNoise(){
         float alpha = 1f;
         int poles = 5;
         double[] multipliers = new double[poles];
@@ -109,6 +109,7 @@ public class Generator {
     }
 
     public ArrayDeque<float[]> getFFTStream(){ return fftStream;}
+    public ArrayDeque<float[]> getFftPhaseStream(){ return fftPhaseStream;}
     public short[] getAudioStream(){ return mAudioStream;}
 
     public void begin(){
@@ -135,7 +136,8 @@ public class Generator {
             AudioTools.ComplexRadialArray fft = AudioTools.calculateComplexFFT(mBuffer);
             fftStream.push(fft.magnitude);
             fftPhaseStream.push(fft.phase);
-            int bufferWrite = audioTrack.write(mBuffer, 0, mBufferSize);
+            //int bufferWrite =
+            audioTrack.write(mBuffer, 0, mBufferSize);
         }
 
     }
