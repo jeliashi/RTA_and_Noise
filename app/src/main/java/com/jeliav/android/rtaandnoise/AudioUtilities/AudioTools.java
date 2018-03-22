@@ -2,6 +2,7 @@ package com.jeliav.android.rtaandnoise.AudioUtilities;
 
 import android.media.AudioFormat;
 import android.util.Log;
+import android.util.Pair;
 
 
 /**
@@ -86,9 +87,41 @@ public class AudioTools {
             fft_power[i] = (float) Math.sqrt((real*real + imag*imag));
         }
 
-        float[] out = linearInterpolation(fft_power);
-        return out;
+        return linearInterpolation(fft_power);
+    }
 
+    public static ComplexRadialArray calculateComplexFFT(short[] inputAudio){
+
+        float[] inputFloat = new float[inputAudio.length];
+        for (int i = 0; i < inputAudio.length; i++){
+            inputFloat[i] = ((float) inputAudio[i]) / 32767.0f;
+        }
+
+        double[] fft =  fftWrapper.fft(inputFloat);
+        float[] power = new float[initialDist.length];
+        float[] phase = new float[initialDist.length];
+
+//        Log.d("FFT", String.valueOf(fft.length) + " vs " + String.valueOf(test.length));
+        for (int i =0; i < (initialDist.length); i++){
+            double real = fft[i*2];
+            double imag = fft[i*2+ 1];
+
+            power[i] = (float) Math.sqrt((real*real + imag*imag));
+            phase[i] = (float) Math.atan2(imag, real);
+        }
+
+        return new ComplexRadialArray(linearInterpolation(power),  linearInterpolation(phase));
+
+    }
+
+
+    public static class ComplexRadialArray{
+        float[] magnitude;
+        float[] phase;
+        public  ComplexRadialArray(float[] mag, float[] phi){
+            this.magnitude = mag;
+            this.phase = phi;
+        }
     }
 
 }

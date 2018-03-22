@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by jeliashiv on 3/21/18.
+Shows the frequency dependent difference in normalized power of input and output
  */
 
 public class TransferDisplaySurface extends SpectrumSurface implements DrawingInterface {
@@ -75,9 +75,7 @@ public class TransferDisplaySurface extends SpectrumSurface implements DrawingIn
                     inFFT[i] += inElement[i];
                     outFFT[i] += outElement[i];
                 } catch (NullPointerException npe){
-                    inFFT[i] += 0.;
-                    outFFT[i] += 0.;
-                    npe.printStackTrace();
+                    return;
                 }
             }
 

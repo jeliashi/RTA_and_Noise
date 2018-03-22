@@ -34,6 +34,7 @@ public class Generator {
     private Random random = new Random();
     public short[] mAudioStream;
     public final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
+    public final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
 
     public Thread produceThread;
 
@@ -43,6 +44,7 @@ public class Generator {
         mAudioStream = new short[mBufferSize];
         for (int i=0; i < AudioTools.displaySamples; i++){
             fftStream.add(new float[AudioTools.outputFFTLength]);
+            fftPhaseStream.add(new float[AudioTools.outputFFTLength]);
         }
         initializeOutput();
     }
@@ -128,8 +130,11 @@ public class Generator {
 //            generateSineTone(440f);
 
             fftStream.removeLast();
+            fftPhaseStream.removeLast();
             mAudioStream = mBuffer;
-            fftStream.push(AudioTools.calculateFFT(mBuffer));
+            AudioTools.ComplexRadialArray fft = AudioTools.calculateComplexFFT(mBuffer);
+            fftStream.push(fft.magnitude);
+            fftPhaseStream.push(fft.phase);
             int bufferWrite = audioTrack.write(mBuffer, 0, mBufferSize);
         }
 

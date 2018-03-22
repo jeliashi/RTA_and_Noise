@@ -34,11 +34,13 @@ public class AudioCollectTest{
 
     public short[] mAudioStream;
     public final ArrayDeque<float[]> fftStream = new ArrayDeque<float[]>();
+    public final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<float[]>();
     private short[] audioBuffer;
 
     public AudioCollectTest(){
         for (int i=0; i < AudioTools.displaySamples; i++){
             fftStream.add(new float[AudioTools.outputFFTLength]);
+            fftPhaseStream.add(new float[AudioTools.outputFFTLength]);
         }
     }
 
@@ -95,7 +97,11 @@ public class AudioCollectTest{
 
             mAudioStream = audioBuffer;
             fftStream.removeLast();
-            fftStream.push(AudioTools.calculateFFT(audioBuffer));
+            fftPhaseStream.removeLast();
+
+            AudioTools.ComplexRadialArray fft = AudioTools.calculateComplexFFT(audioBuffer);
+            fftStream.push(fft.magnitude);
+            fftPhaseStream.push(fft.phase);
 
         }
 
