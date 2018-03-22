@@ -32,19 +32,20 @@ public class AudioCollectTest{
 
     public static int mBufferSize = AudioTools.BufferSize;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
 
-    public ArrayDeque<short[]> mAudioStream;
+    public short[] mAudioStream;
     public final ArrayDeque<float[]> fftStream = new ArrayDeque<float[]>();
     private short[] audioBuffer;
 
     public AudioCollectTest(){
         for (int i=0; i < AudioTools.displaySamples; i++){
-            fftStream.add(new float[]{});
+            fftStream.add(new float[AudioTools.outputFFTLength]);
         }
     }
 
     public ArrayDeque<float[]> getFFTStream(){
         return fftStream;
     }
+    public short[] getAudioStream() { return mAudioStream; }
 
     public void startInputStream(int audio_source) {
 
@@ -53,13 +54,7 @@ public class AudioCollectTest{
         }
 
         audioBuffer = new short[mBufferSize];
-
-
-        mAudioStream = new ArrayDeque<short[]>();
-        for (int i =0; i < AudioTools.displaySamples; i++){
-            mAudioStream.add(audioBuffer);
-        }
-
+        mAudioStream = new short[mBufferSize];
 
         Log.d(LOG_TAG, "Creating new Audio record");
 
@@ -98,8 +93,7 @@ public class AudioCollectTest{
         while (mShouldContinue) {
             int bufferRead = mAudioRecord.read(audioBuffer, 0, audioBuffer.length);
 
-            mAudioStream.removeLast();
-            mAudioStream.push(audioBuffer);
+            mAudioStream = audioBuffer;
             fftStream.removeLast();
             fftStream.push(AudioTools.calculateFFT(audioBuffer));
 

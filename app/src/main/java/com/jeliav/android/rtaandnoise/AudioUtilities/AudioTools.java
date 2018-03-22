@@ -12,8 +12,8 @@ public class AudioTools {
     public static final int AUDIO_SAMPLE_RATE = 44100;
     public static final int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     public static int BufferSize = 4096;
-    public static final int displaySamples = 100;
-    private static final int outputFFTLength = BufferSize/2;
+    public static final int displaySamples = 20;
+    public static final int outputFFTLength = BufferSize/2;
 
     private static KissFFTWrapper fftWrapper;
     static{
@@ -76,8 +76,6 @@ public class AudioTools {
         }
 
         double[] fft =  fftWrapper.fft(inputFloat);
-        Log.d("fft", String.valueOf(fft.length));
-
 
         float[] fft_power = new float[initialDist.length];
 //        Log.d("FFT", String.valueOf(fft.length) + " vs " + String.valueOf(test.length));
@@ -85,7 +83,7 @@ public class AudioTools {
             double real = fft[i*2];
             double imag = fft[i*2+ 1];
 
-            fft_power[i] = (float) Math.log(Math.sqrt((real*real + imag*imag)));
+            fft_power[i] = (float) Math.sqrt((real*real + imag*imag));
         }
 
         float[] out = linearInterpolation(fft_power);

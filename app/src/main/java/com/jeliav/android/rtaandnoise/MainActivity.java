@@ -14,6 +14,7 @@ import android.widget.Button;
 import com.jeliav.android.rtaandnoise.AudioUtilities.AudioCollectTest;
 import com.jeliav.android.rtaandnoise.AudioUtilities.Generator;
 import com.jeliav.android.rtaandnoise.view.FFTSpectrumSurface;
+import com.jeliav.android.rtaandnoise.view.TransferDisplaySurface;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     // TODO need to add dB meter with dBC of the past 5 seconds displayed on it
     // TODO to handle shared settings of: audio input, audio gain, level clip
 
-    // TODO need to add audio generator
+    // TODO need to combine audio receive with audio generator thread
     // TODO need to add shared settings for audio generator
 
     // TODO need new activity with intent which measures transfer function, delay, and coherence
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public AudioCollectTest mCollect;
     public Generator mGenerate;
     public FFTSpectrumSurface mSpectrum;
+    public TransferDisplaySurface mTransfer;
     public boolean isRecording = false;
     private Thread drawingThread;
 
@@ -52,7 +54,9 @@ public class MainActivity extends AppCompatActivity {
         mGenerate = new Generator();
         mSpectrum = findViewById(R.id.spectrum_view);
         mSpectrum.setAudioSource(mCollect);
-
+        mTransfer = findViewById(R.id.transfer_view);
+        mTransfer.setInputSource(mCollect);
+        mTransfer.setOutputSource(mGenerate);
 
         mStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +124,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 while (isRecording){
                     mSpectrum.drawAll();
+                    mTransfer.drawAll();
+                    if (mSpectrum.averageDrawingTime() < 80 && mSpectrum.whenToDraw.size() > 3){
+                        try{
+                            drawingThread.sleep(200);
+                        }catch (InterruptedException ie){
+                            ie.printStackTrace();
+                        }
+                    }
                 }
             }
         }, "Drawing Thread");

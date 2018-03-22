@@ -58,7 +58,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         hotThreshold.put(128,3000);
         hotThreshold.put(64,4000);
     }
-    private List<Long> whenToDraw =  new ArrayList<Long>();
+    public List<Long> whenToDraw =  new ArrayList<Long>();
 
     public static Pair<Long, String> message;
     public Pair<Long, Integer> lastPaintTimeAvg = new Pair<>(System.currentTimeMillis(), 0);
@@ -111,7 +111,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
         float x,y;
         float[] sampleFFT;
-        float clip = (float) Math.log((float) hotThreshold.get(resolution));
+        float clip = (float) hotThreshold.get(resolution);
         int i = 0;
         Iterator<float[]> fftIterator = fftHistory.iterator();
         while (fftIterator.hasNext()) {
@@ -134,9 +134,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
                 cme.printStackTrace();
                 break;
             }
-
         }
-
     }
 
     private void drawGridandAxes(Context context, Canvas canvas){
@@ -159,7 +157,6 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         int height = getHeight();
         int width = getWidth();
         float x,y;
-//        canvas.drawRect(0, height - getTextPxSize(PAINT_LABEL_SIZE), width, height, textPaint);
         for (float freq : freqLines){
             x = AudioTools.findFirstInterpGreater(freq) * (float) width;
             canvas.drawLine(x, 0, x,(float) height, errPaint);
@@ -212,19 +209,11 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         paint.setTextSize(getTextPxSize(PAINT_TEXT_SIZE));
     }
 
-    private static float getTextDpSize(float textSize){
-        return (textSize / Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    private static float getTextPxSize(float textSize){
-        return (textSize * Resources.getSystem().getDisplayMetrics().density);
-    }
-
     private boolean canDrawSpectogram(){
         return (resolution >= minResolution);
     }
 
-    private int avgDrawTime(){
+    public int avgDrawTime(){
         if (System.currentTimeMillis() - lastPaintTimeAvg.first > 1000){
             lastPaintTimeAvg = new Pair<>(System.currentTimeMillis(),
                     (whenToDraw.size() > 0) ? DrawAverage(whenToDraw) : 0);
@@ -238,6 +227,12 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
             sum += (int) l;
         }
         return sum / mArray.size();
+    }
+
+    public long averageDrawingTime(){
+        long sum = 0;
+        for (long l : whenToDraw) sum += l;
+        return sum / whenToDraw.size();
     }
 
 
@@ -256,7 +251,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         }
 
         if (canDrawSpectogram() &&
-                whenToDraw.size() >= AudioTools.displaySamples / 5 &&
+                whenToDraw.size() >= AudioTools.displaySamples  &&
                 avgDrawTime() > fps) {
             whenToDraw = null;
             resolution /= 2;

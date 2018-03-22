@@ -18,7 +18,7 @@ public class Generator {
 
     public static final String LOG_TAG = Generator.class.getSimpleName();
 
-    public static int AUDIO_OUTPUT_SAMP_RATE = AudioTools.AUDIO_SAMPLE_RATE;
+    public static int AUDIO_OUTPUT_SAMPLE_RATE = AudioTools.AUDIO_SAMPLE_RATE;
     public static int AUDIO_ENCODING = AudioTools.AUDIO_ENCODING;
     public static int mBufferSize = AudioTools.BufferSize;
 
@@ -27,12 +27,12 @@ public class Generator {
     private final short[] mBuffer;
     private float phase;
 
-    public static boolean mShouldContinue = false;
+    public boolean mShouldContinue = false;
 
     private short MAX_AMPLITUDE = Short.MAX_VALUE;
 
     private Random random = new Random();
-    public ArrayDeque<short[]> mAudioStream;
+    public short[] mAudioStream;
     public final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
 
     public Thread produceThread;
@@ -40,12 +40,16 @@ public class Generator {
     public Generator(){
         mBuffer = new short[mBufferSize];
         phase = 0;
+        mAudioStream = new short[mBufferSize];
+        for (int i=0; i < AudioTools.displaySamples; i++){
+            fftStream.add(new float[AudioTools.outputFFTLength]);
+        }
         initializeOutput();
     }
 
     private void initializeOutput(){
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                AUDIO_OUTPUT_SAMP_RATE, AudioFormat.CHANNEL_OUT_DEFAULT,
+                AUDIO_OUTPUT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_DEFAULT,
                 AUDIO_ENCODING, mBufferSize,
                 AudioTrack.MODE_STREAM);
 
@@ -60,7 +64,7 @@ public class Generator {
     }
 
     public void generateSineTone(float freq){
-        float dPhase = freq / (float) AUDIO_OUTPUT_SAMP_RATE;
+        float dPhase = freq / (float) AUDIO_OUTPUT_SAMPLE_RATE;
         for (int i=0 ; i < mBufferSize; i++){
             mBuffer[i] = (short)( Math.sin(2*Math.PI *phase) * MAX_AMPLITUDE);
             phase += dPhase;
@@ -103,6 +107,7 @@ public class Generator {
     }
 
     public ArrayDeque<float[]> getFFTStream(){ return fftStream;}
+    public short[] getAudioStream(){ return mAudioStream;}
 
     public void begin(){
         if (audioTrack == null || audioTrack.getState() != AudioRecord.STATE_INITIALIZED){
@@ -117,15 +122,17 @@ public class Generator {
         produceThread.start();
     }
 
-    public void play(){
+    private void play(){
         while (mShouldContinue){
-//            generatePinkNoise();
-            generateSineTone(440f);
+            generatePinkNoise();
+//            generateSineTone(440f);
 
             fftStream.removeLast();
+            mAudioStream = mBuffer;
             fftStream.push(AudioTools.calculateFFT(mBuffer));
             int bufferWrite = audioTrack.write(mBuffer, 0, mBufferSize);
         }
+
     }
 
     public void stop(){
@@ -137,6 +144,7 @@ public class Generator {
         } catch (InterruptedException ie){
             ie.printStackTrace();
         }
+        mAudioStream = new short[mBufferSize];
         audioTrack.stop();
         audioTrack.release();
     }
