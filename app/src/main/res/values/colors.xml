@@ -8,4 +8,10 @@
     <color name="specColor">#FF2C00</color>
     <color name="textPaint">#AAFFFFFF</color>
     <color name="errPaint">#BBFF0000</color>
+    <color name="greenOnMeter">#0F0</color>
+    <color name="greenOffMeter">#040</color>
+    <color name="yellowOnMeter">#FF0</color>
+    <color name="yellowOffMeter">#440</color>
+    <color name="redOnMeter">#F00</color>
+    <color name="redOffMeter">#400</color>
 </resources>

@@ -13,7 +13,7 @@ public class AudioTools {
     static final int AUDIO_SAMPLE_RATE = 44100;
     static final int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     static int BufferSize = 4096;
-    public static final int displaySamples = 50;
+    public static final int displaySamples = 20;
     static final int outputFFTLength = BufferSize/2;
 
     private static KissFFTWrapper fftWrapper;
@@ -39,6 +39,25 @@ public class AudioTools {
         for (int i = 0; i < outputFFTLength; i++){
             finalDist[i] = (float) Math.pow(10, init_log + (((float) i) * diff_log));
         }
+    }
+
+    public static float[] conservativeResolutionReduction(float[] input, int newResoltuion){
+        if (input.length  <= newResoltuion)
+            throw new IllegalArgumentException("Size of input must be greater than new resolution ("+String.valueOf(input.length)+","+String.valueOf(newResoltuion)+")");
+        float[] out = new float[newResoltuion];
+        for (int i = 0; i < newResoltuion ; i++){
+            float lowerBound = (float) ( i * input.length) / (float) newResoltuion;
+            float lowerFrac = 1 - (lowerBound%1f);
+            float upperBound = (float) ((i+1) * input.length) / (float) newResoltuion;
+            float upperFrac = (upperBound%1f > 0.0001f) ? upperBound%1f : 0f;
+            out[i] = input[(int) lowerBound] *lowerFrac;
+            if (upperFrac > 0f) out[i] += input[(int) upperBound] *upperFrac;
+            if ((int) upperBound - (int) lowerBound > 1){
+                for (int j = (int) lowerBound + 1; j < (int) upperBound - 1; j++) out[i] += input[j];
+            }
+            out[i] /= (upperBound - lowerBound);
+        }
+        return out;
     }
 
     private static int findFirstGreater(float input){
@@ -93,10 +112,11 @@ public class AudioTools {
 
         float[] inputFloat = new float[inputAudio.length];
         for (int i = 0; i < inputAudio.length; i++){
-            inputFloat[i] = ((float) inputAudio[i]) / 32767.0f;
+            inputFloat[i] = (float) inputAudio[i];
         }
-
         double[] fft =  fftWrapper.fft(inputFloat);
+//        for (double d : fft) if (d > (double) Float.MAX_VALUE ||
+//                d < (double) Float.MIN_VALUE) Log.e("FFT", "fft value exceeded float maximum");
         float[] power = new float[initialDist.length];
         float[] phase = new float[initialDist.length];
 

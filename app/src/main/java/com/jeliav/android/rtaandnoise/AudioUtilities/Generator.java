@@ -14,31 +14,23 @@ import java.util.Random;
  class for generating audio
  */
 
-public class Generator {
+public class Generator extends AudioWrapper{
 
     private static final String LOG_TAG = Generator.class.getSimpleName();
 
-    private static int AUDIO_OUTPUT_SAMPLE_RATE = AudioTools.AUDIO_SAMPLE_RATE;
-    private static int mBufferSize = AudioTools.BufferSize;
-
     private AudioTrack audioTrack = null;
 
-    private final short[] mBuffer;
     private float phase;
-
-    public boolean mShouldContinue = false;
+    private int AUDIO_OUTPUT_SAMPLE_RATE = AudioTools.AUDIO_SAMPLE_RATE;
 
     private short MAX_AMPLITUDE = Short.MAX_VALUE;
 
     private Random random = new Random();
-    private short[] mAudioStream;
-    private final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
-    private final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
 
     private Thread produceThread;
 
     public Generator(){
-        mBuffer = new short[mBufferSize];
+        audioBuffer = new short[mBufferSize];
         phase = 0;
         mAudioStream = new short[mBufferSize];
         for (int i=0; i < AudioTools.displaySamples; i++){
@@ -68,7 +60,7 @@ public class Generator {
     private void generateSineTone(float freq){
         float dPhase = freq / (float) AUDIO_OUTPUT_SAMPLE_RATE;
         for (int i=0 ; i < mBufferSize; i++){
-            mBuffer[i] = (short)( Math.sin(2*Math.PI *phase) * MAX_AMPLITUDE);
+            audioBuffer[i] = (short)( Math.sin(2*Math.PI *phase) * MAX_AMPLITUDE);
             phase += dPhase;
             phase %= 1f;
         }
@@ -76,7 +68,7 @@ public class Generator {
 
     private void generateWhiteNoise(){
         for (int i=0; i < mBufferSize; i++){
-            mBuffer[i] = (short) random.nextGaussian();
+            audioBuffer[i] = (short) random.nextGaussian();
             }
     }
 
@@ -94,7 +86,7 @@ public class Generator {
             nextValue(poles, multipliers, values);
         }
         for (int i=0; i < mBufferSize; i++){
-            mBuffer[i] = nextValue(poles, multipliers, values);
+            audioBuffer[i] = nextValue(poles, multipliers, values);
         }
     }
 
@@ -111,6 +103,8 @@ public class Generator {
     public ArrayDeque<float[]> getFFTStream(){ return fftStream;}
     public ArrayDeque<float[]> getFftPhaseStream(){ return fftPhaseStream;}
     public short[] getAudioStream(){ return mAudioStream;}
+
+    public void clearAudioBuffer(){ mAudioStream = new short[mBufferSize];}
 
     public void begin(){
         if (audioTrack == null || audioTrack.getState() != AudioRecord.STATE_INITIALIZED){
@@ -132,12 +126,12 @@ public class Generator {
 
             fftStream.removeLast();
             fftPhaseStream.removeLast();
-            mAudioStream = mBuffer;
-            AudioTools.ComplexRadialArray fft = AudioTools.calculateComplexFFT(mBuffer);
+            mAudioStream = audioBuffer;
+            AudioTools.ComplexRadialArray fft = AudioTools.calculateComplexFFT(audioBuffer);
             fftStream.push(fft.magnitude);
             fftPhaseStream.push(fft.phase);
             //int bufferWrite =
-            audioTrack.write(mBuffer, 0, mBufferSize);
+            audioTrack.write(audioBuffer, 0, mBufferSize);
         }
 
     }

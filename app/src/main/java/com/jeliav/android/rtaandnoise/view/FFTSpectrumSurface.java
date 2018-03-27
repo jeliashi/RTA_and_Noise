@@ -31,7 +31,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
 
     private static final float PAINT_TEXT_SIZE = 12f;
     private static final float PAINT_LABEL_SIZE = 8f;
-    public static int resolution =  512;
+    public static int resolution =  1024;
     public static int minResolution = 64;
 
     public static Paint paintSpectogram = new Paint();
@@ -39,15 +39,19 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
     public static Paint errPaint = new Paint();
     public static Paint labelPaint = new Paint();
 
+    public static float MIN_DB_THRESHOLD = -80f;
+
     private SpectrogramColors spectrogramColors = new SpectrogramColors();
 
     public static final SparseIntArray hotThreshold = new SparseIntArray();
     static{
-        hotThreshold.put(512,1000);
-        hotThreshold.put(256,1200);
-        hotThreshold.put(128,1500);
-        hotThreshold.put(64,2000);
+        hotThreshold.put(1024, -200);
+        hotThreshold.put(512,-150);
+        hotThreshold.put(256,-200);
+        hotThreshold.put(128,-300);
+        hotThreshold.put(64,-400);
     }
+
 
     public static Pair<Long, String> message;
 
@@ -98,12 +102,18 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
         for (float[] sampleFFT : fftHistory) {
 
             y = height - (spectrumHeight * i);
-            int freqPoints = sampleFFT.length;
+            float[] regrid_fft;
+            if (resolution < sampleFFT.length){
+                regrid_fft = AudioTools.conservativeResolutionReduction(sampleFFT, resolution);
+            } else{
+                regrid_fft = new float[resolution];
+            }
 
             for (int j = 0; j < resolution; j++) {
+                double val = 10*Math.log(regrid_fft[j])+clip;
+                val = Math.min(Math.max(val, MIN_DB_THRESHOLD), 0f)/MIN_DB_THRESHOLD;
                 x = (sampleWidth * j);
-                float magnitude = (freqPoints > 0) ? sampleFFT[j * freqPoints / resolution] : 0f;
-                int colorIndex = ((int) (((float) spectrogramColors.range) * Math.min(Math.max(magnitude / clip, 0.0f), 1.0f))) % spectrogramColors.range;
+                int colorIndex = ((int) (((double) spectrogramColors.range-1) *(1-val)) ) % spectrogramColors.range;
                 int[] RGB = spectrogramColors.color_map[colorIndex];
                 paintSpectogram.setColor(Color.rgb(RGB[0], RGB[1], RGB[2]));
                 canvas.drawRect(x, y - spectrumHeight, x - sampleWidth, y, paintSpectogram);
@@ -117,6 +127,10 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
     private void drawGridandAxes(Canvas canvas){
         float[] freqLines;
         switch (resolution){
+            case 1024:
+                freqLines = new float[]{25f, 31f, 40f, 50f, 63f, 80f, 100f, 125f, 160f, 200f, 250f, 310f, 400f,
+                        500f, 630f, 800f, 1000f, 1250f, 1600f, 2000f, 2500f, 3100f, 4000f, 5000f, 6300f,8000f, 10000f, 12500f, 16000f};
+                break;
             case 512:
                 freqLines = new float[]{25f, 31f, 40f, 50f, 63f, 80f, 100f, 125f, 160f, 200f, 250f, 310f, 400f,
                 500f, 630f, 800f, 1000f, 1250f, 1600f, 2000f, 2500f, 3100f, 4000f, 5000f, 6300f,8000f, 10000f, 12500f, 16000f};
@@ -212,7 +226,7 @@ public class FFTSpectrumSurface extends SpectrumSurface implements DrawingInterf
             return canvas;
         }
 
-        if (canDrawSpectogram() &&
+        if (null != whenToDraw && canDrawSpectogram() &&
                 whenToDraw.size() >= AudioTools.displaySamples  &&
                 avgDrawTime() > minDrawTime) {
             whenToDraw = null;

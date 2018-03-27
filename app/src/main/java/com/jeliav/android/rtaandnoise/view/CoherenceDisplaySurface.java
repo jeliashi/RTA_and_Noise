@@ -91,8 +91,6 @@ public class CoherenceDisplaySurface extends SpectrumSurface implements DrawingI
             return;
         }
 
-        Log.d(LOG_TAG, String.valueOf(coherenceToPush[50]));
-
         coherenceHistory.push(coherenceToPush);
         float coherenceHeight = height / ((float) AudioTools.displaySamples);
         float sampleWidth = width / ((float) resolution);

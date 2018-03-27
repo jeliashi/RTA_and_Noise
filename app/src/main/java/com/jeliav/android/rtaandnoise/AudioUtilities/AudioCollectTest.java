@@ -17,33 +17,15 @@ Hz
  */
 
 
-public class AudioCollectTest{
+public class AudioCollectTest extends AudioWrapper{
 
     private static final String LOG_TAG = AudioCollectTest.class.getSimpleName();
 
-    public boolean mShouldContinue;
-
     private AudioRecord mAudioRecord;
 
-    private static int mBufferSize = AudioTools.BufferSize;//2*AUDIO_INPUT_SAMP_RATE / MIN_FREQ_CALCULATED;
-
-    private short[] mAudioStream;
-    private final ArrayDeque<float[]> fftStream = new ArrayDeque<>();
-    private final ArrayDeque<float[]> fftPhaseStream = new ArrayDeque<>();
-    private short[] audioBuffer;
-
     public AudioCollectTest(){
-        for (int i=0; i < AudioTools.displaySamples; i++){
-            fftStream.add(new float[AudioTools.outputFFTLength]);
-            fftPhaseStream.add(new float[AudioTools.outputFFTLength]);
-        }
+        super();
     }
-
-    public ArrayDeque<float[]> getFFTStream(){
-        return fftStream;
-    }
-    public ArrayDeque<float[]> getFFTPhaseStream() { return fftPhaseStream; }
-    public short[] getAudioStream() { return mAudioStream; }
 
     public void startInputStream(int audio_source) {
         int AUDIO_INPUT_SAMP_RATE = AudioTools.AUDIO_SAMPLE_RATE;
